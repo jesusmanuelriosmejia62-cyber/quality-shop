@@ -1,11 +1,11 @@
-import { business, whatsappLink } from '../data'
+import { business, logo, whatsappLink } from '../data'
 
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="container footer__inner">
         <div className="footer__brand">
-          <img src="/logo.png" alt="" width="48" height="48" />
+          <img src={logo} alt="" width="48" height="48" />
           <div>
             <strong>{business.name}</strong>
             <p>{business.city}</p>

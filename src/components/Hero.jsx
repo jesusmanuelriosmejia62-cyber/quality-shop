@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { business, whatsappLink } from '../data'
+import { business, logo, whatsappLink } from '../data'
 
 export default function Hero() {
   const ref = useRef(null)
@@ -16,11 +16,11 @@ export default function Hero() {
   return (
     <section id="inicio" className="hero" ref={ref} onMouseMove={handleMove}>
       <div className="hero__bg" aria-hidden="true">
-        <img src="/logo.png" alt="" />
+        <img src={logo} alt="" />
       </div>
 
       <div className="container hero__inner">
-        <img className="hero__badge" src="/logo.png" alt="Logo de Quality Shop" />
+        <img className="hero__badge" src={logo} alt="Logo de Quality Shop" />
         <p className="eyebrow">Ocaña · Envíos a toda Colombia</p>
         <h1>
           Tu estilo está a <span>un mensaje</span>

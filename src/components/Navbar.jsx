@@ -1,4 +1,4 @@
-import { business, whatsappLink } from '../data'
+import { business, logo, whatsappLink } from '../data'
 import { useCart } from '../CartContext'
 
 export default function Navbar() {
@@ -8,7 +8,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="container navbar__inner">
         <a href="#inicio" className="navbar__brand">
-          <img src="/logo.png" alt="" width="40" height="40" />
+          <img src={logo} alt="" width="40" height="40" />
           <span>{business.name}</span>
         </a>
         <nav className="navbar__links">

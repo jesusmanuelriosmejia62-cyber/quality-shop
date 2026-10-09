@@ -1,3 +1,6 @@
+// Ruta del logo que respeta la carpeta donde se publica la web (GitHub Pages usa /quality-shop/)
+export const logo = `${import.meta.env.BASE_URL}logo.png`
+
 export const business = {
   name: 'Quality Shop Col',
   city: 'Ocaña, Norte de Santander',
