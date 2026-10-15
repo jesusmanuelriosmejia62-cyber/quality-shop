@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { products, sampleReviews } from '../data'
+import { products, sampleReviews, shipping } from '../data'
 import { money, categoryLink } from '../utils'
 import { useCart } from '../CartContext'
+import { useLogoCutoutUrl } from '../cutout'
 import ProductCard from './ProductCard'
+import FloatingLogo from './FloatingLogo'
 
 const storageKey = (id) => `qs-reviews-${id}`
 
@@ -23,6 +25,7 @@ const Stars = ({ value }) => (
 
 export default function ProductDetail({ id }) {
   const { add } = useCart()
+  const watermark = useLogoCutoutUrl()
   const product = products.find((p) => p.id === id)
   const [size, setSize] = useState('')
   const [showHint, setShowHint] = useState(false)
@@ -35,7 +38,7 @@ export default function ProductDetail({ id }) {
       <main className="section">
         <div className="container center">
           <h2>No encontramos esta prenda</h2>
-          <a href="#categorias" className="btn">Ver categorías</a>
+          <a href="#categorias" className="btn">Ver colección</a>
         </div>
       </main>
     )
@@ -51,6 +54,7 @@ export default function ProductDetail({ id }) {
   const needSize = () => {
     if (size) return true
     setShowHint(true)
+    document.getElementById('sizes')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return false
   }
 
@@ -86,18 +90,29 @@ export default function ProductDetail({ id }) {
 
   return (
     <main>
-      <section className="section section--soft detail">
+      <section className="detail">
+        {watermark && (
+          <div className="detail__bg" aria-hidden="true">
+            <img src={watermark} alt="" />
+          </div>
+        )}
         <div className="container">
-          <a href={categoryLink(backCategory)} className="crumb">← Volver a {backCategory}</a>
+          <nav className="crumbs" aria-label="Ruta">
+            <a href="#categorias">Colección</a>
+            <span aria-hidden="true">/</span>
+            <a href={categoryLink(backCategory)}>{backCategory}</a>
+            <span aria-hidden="true">/</span>
+            <span>{product.name}</span>
+          </nav>
 
           <div className="detail__grid">
             <div className="detail__img">
-              <img src={product.photo} alt={product.name} />
+              <img className="photo" src={product.photo} alt={product.name} />
               {product.tag && <span className="product__tag">{product.tag}</span>}
             </div>
 
             <div className="detail__info">
-              <p className="detail__cats">{product.cats.join(' · ')}</p>
+              <p className="label">{product.cats.join(' · ')}</p>
               <h1>{product.name}</h1>
               <div className="detail__rating">
                 <Stars value={Math.round(average)} />
@@ -106,15 +121,7 @@ export default function ProductDetail({ id }) {
               <p className="detail__price">{product.price ? money.format(product.price) : 'Consultar precio'}</p>
               <p className="detail__desc">{product.desc}</p>
 
-              {product.details && (
-                <ul className="detail__list">
-                  {product.details.map((d) => (
-                    <li key={d}>{d}</li>
-                  ))}
-                </ul>
-              )}
-
-              <p className="detail__label">Talla</p>
+              <p className="detail__label" id="sizes">Talla</p>
               <div className="sizes" role="radiogroup" aria-label="Elige tu talla">
                 {product.sizes.map((s) => (
                   <button
@@ -122,7 +129,7 @@ export default function ProductDetail({ id }) {
                     type="button"
                     role="radio"
                     aria-checked={size === s}
-                    className={`size ${size === s ? 'on' : ''}`}
+                    className={`size ${size === s ? 'on' : ''} ${showHint && !size ? 'size--alert' : ''}`}
                     onClick={() => {
                       setSize(s)
                       setShowHint(false)
@@ -135,24 +142,47 @@ export default function ProductDetail({ id }) {
               </div>
               {showHint && <p className="detail__hint" role="alert">Elige una talla para continuar.</p>}
 
-              <button type="button" className="btn btn--buy" onClick={buyNow}>
-                Comprar ahora
-              </button>
-              <button type="button" className="btn btn--outline btn--buy" onClick={addToCart}>
-                Agregar al carrito
-              </button>
+              <div className="detail__buy">
+                <button type="button" className="btn btn--buy" onClick={buyNow}>
+                  Comprar ahora
+                </button>
+                <button type="button" className="btn btn--outline btn--buy" onClick={addToCart}>
+                  Agregar al carrito
+                </button>
+              </div>
               {added && (
                 <p className="detail__added" role="status">
                   ✓ Agregada al carrito. <a href="#/carrito">Ver carrito</a>
                 </p>
               )}
-              <p className="detail__note">Envíos a toda Colombia · Confirmamos disponibilidad por mensaje.</p>
+
+              <div className="accordion">
+                {product.details && (
+                  <details open>
+                    <summary>Detalles</summary>
+                    <ul className="detail__list">
+                      {product.details.map((d) => (
+                        <li key={d}>{d}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                <details>
+                  <summary>Envíos</summary>
+                  <p>{shipping.coverage} Confirmamos disponibilidad, costo y tiempos por WhatsApp antes de despachar.</p>
+                </details>
+                <details>
+                  <summary>Cómo pedir</summary>
+                  <p>Elige tu talla, agrega al carrito y completa tus datos. Te llevamos a WhatsApp con el pedido listo para enviar.</p>
+                </details>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="section">
+      <section className="section has-floatlogo">
+        <FloatingLogo className="floatlogo--left" />
         <div className="container">
           <h2>Comentarios</h2>
           <div className="reviews">
@@ -206,15 +236,21 @@ export default function ProductDetail({ id }) {
                   required
                 />
               </label>
-              <button type="submit" className="btn btn--dark">Publicar comentario</button>
+              <button type="submit" className="btn">Publicar comentario</button>
             </form>
           </div>
         </div>
       </section>
 
-      <section className="section section--soft">
+      <section className="section section--soft has-floatlogo">
+        <FloatingLogo className="floatlogo--right" />
         <div className="container">
-          <h2>También te puede gustar</h2>
+          <div className="section-head">
+            <div>
+              <p className="label">Completa tu pinta</p>
+              <h2>También te puede gustar</h2>
+            </div>
+          </div>
           <div className="products">
             {related.map((p) => (
               <ProductCard key={p.id} p={p} />

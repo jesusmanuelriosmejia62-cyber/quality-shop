@@ -114,10 +114,10 @@ export default function CartPage() {
     return (
       <main className="section section--soft">
         <div className="container cart-empty">
-          <span aria-hidden="true">🛍️</span>
+          <p className="label">Carrito</p>
           <h1>Tu carrito está vacío</h1>
-          <p>Mira las categorías y elige las prendas que más te gusten.</p>
-          <a href="#categorias" className="btn">Ver categorías</a>
+          <p>Mira la colección y elige las prendas que más te gusten.</p>
+          <a href="#categorias" className="btn">Ver colección</a>
         </div>
       </main>
     )

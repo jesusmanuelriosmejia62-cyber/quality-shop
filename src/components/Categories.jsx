@@ -1,29 +1,33 @@
-import { categories, business } from '../data'
+import { categories } from '../data'
+import { categoryLink } from '../utils'
+import Photo from './Photo'
 
 export default function Categories() {
   return (
     <section id="categorias" className="section">
       <div className="container">
-        <div className="section__head">
-          <span className="eyebrow eyebrow--dark">Categorías</span>
-          <h2>¿Qué pinta buscas hoy?</h2>
-          <p className="section__lead">Cada prenda es un acierto. Elige una categoría y mira lo que tenemos.</p>
+        <div className="section-head reveal">
+          <div>
+            <p className="label">(01) Colección</p>
+            <h2>Compra por categoría</h2>
+          </div>
+          <a href={categoryLink('Todo')} className="link-line">Ver todo</a>
         </div>
 
         <div className="tiles">
-          {categories.map((c) => (
-            <a key={c.title} href={`#/categoria/${encodeURIComponent(c.title)}`} className="tile">
-              <img className="tile__bg" src={c.photo} alt="" loading="lazy" />
+          {categories.map((c, i) => (
+            <a
+              key={c.title}
+              href={categoryLink(c.title)}
+              className="tile reveal"
+              style={{ '--d': `${(i % 3) * 0.08}s` }}
+            >
+              <Photo className="tile__bg" src={c.photo} />
+              <span className="tile__idx">{String(i + 1).padStart(2, '0')}</span>
               <span className="tile__title">{c.title}</span>
-              <small>Ver prendas →</small>
+              <span className="tile__cta">Comprar <i aria-hidden="true">→</i></span>
             </a>
           ))}
-        </div>
-
-        <div className="center">
-          <a href={business.tiktok} className="btn btn--dark" target="_blank" rel="noreferrer">
-            Ver las novedades en TikTok
-          </a>
         </div>
       </div>
     </section>

@@ -1,30 +1,62 @@
-import { business, logo, whatsappLink } from '../data'
+import { business, categories, logo, whatsappLink } from '../data'
+import { categoryLink } from '../utils'
 
 export default function Footer() {
   return (
     <footer className="footer">
-      <div className="container footer__inner">
-        <div className="footer__brand">
-          <img src={logo} alt="" width="48" height="48" />
+      <div className="container">
+        <p className="footer__word" aria-hidden="true">Quality Shop</p>
+
+        <div className="footer__grid">
+          <div className="footer__brand">
+            <img src={logo} alt="" width="64" height="64" />
+            <p>
+              Ropa de calidad que no pasa de moda.
+              <br />
+              {business.city}.
+            </p>
+          </div>
+
           <div>
-            <strong>{business.name}</strong>
-            <p>{business.city}</p>
+            <p className="label label--light">Tienda</p>
+            <ul>
+              <li><a href={categoryLink('Todo')}>Ver todo</a></li>
+              {categories.slice(0, 4).map((c) => (
+                <li key={c.title}><a href={categoryLink(c.title)}>{c.title}</a></li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="label label--light">Ayuda</p>
+            <ul>
+              <li><a href="#comprar">Cómo comprar</a></li>
+              <li><a href="#envios">Envíos y pagos</a></li>
+              <li><a href="#visitanos">Visítanos</a></li>
+              <li><a href="#/carrito">Carrito</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="label label--light">Síguenos</p>
+            <ul>
+              <li><a href={whatsappLink()} target="_blank" rel="noreferrer">WhatsApp</a></li>
+              <li><a href={business.tiktok} target="_blank" rel="noreferrer">TikTok</a></li>
+              {business.instagram && (
+                <li><a href={business.instagram} target="_blank" rel="noreferrer">Instagram</a></li>
+              )}
+              {business.facebook && (
+                <li><a href={business.facebook} target="_blank" rel="noreferrer">Facebook</a></li>
+              )}
+            </ul>
           </div>
         </div>
-        <div className="footer__links">
-          <a href={whatsappLink()} target="_blank" rel="noreferrer">WhatsApp</a>
-          <a href={business.tiktok} target="_blank" rel="noreferrer">TikTok</a>
-          {business.instagram && (
-            <a href={business.instagram} target="_blank" rel="noreferrer">Instagram</a>
-          )}
-          {business.facebook && (
-            <a href={business.facebook} target="_blank" rel="noreferrer">Facebook</a>
-          )}
-        </div>
+
+        <p className="footer__copy">
+          <span>© {new Date().getFullYear()} {business.name}</span>
+          <span>Todos los derechos reservados</span>
+        </p>
       </div>
-      <p className="footer__copy">
-        © {new Date().getFullYear()} {business.name}. Todos los derechos reservados.
-      </p>
     </footer>
   )
 }

@@ -8,7 +8,7 @@ export const business = {
   whatsapp: '570000000000',
   whatsappMessage: 'Hola Quality Shop, quiero ver las pintas disponibles 👋',
   tiktok: 'https://www.tiktok.com/@qualityshop__col',
-  instagram: '', // déjalo vacío si no tienen
+  instagram: 'https://www.instagram.com/qualityshop___col___/', // confirmar el usuario con el dueño
   facebook: '', // déjalo vacío si no tienen
 }
 
@@ -18,15 +18,17 @@ const img = (id, w = 800) =>
 const ROPA = ['S', 'M', 'L', 'XL']
 const CALZ = ['36', '37', '38', '39', '40', '41', '42', '43']
 
-// Las fotos son de stock, solo de EJEMPLO para la demo.
-// Para fotos reales: pon el archivo en public/img/ y usa photo: '/img/camisetas.jpg'
+// Fotos del local: copia cada archivo en public/img/categorias/ con el nombre indicado aquí.
+// Mientras no existan, la web muestra un recuadro negro con el logo.
+const local = (file) => `${import.meta.env.BASE_URL}img/categorias/${file}`
+
 export const categories = [
-  { title: 'Camisetas', photo: img('photo-1517466787929-bc90951d0974') },
-  { title: 'Busos y hoodies', photo: img('photo-1556905055-8f358a7a47b2') },
-  { title: 'Chaquetas', photo: img('photo-1551028719-00167b16eac5') },
-  { title: 'Tenis', photo: img('photo-1542291026-7eec264c27ff') },
-  { title: 'Mujer', photo: img('photo-1518459031867-a89b944bffe4') },
-  { title: 'Hombre', photo: img('photo-1571008887538-b36bb32f4571') },
+  { title: 'Camisetas', photo: local('camisetas.jpg') },
+  { title: 'Busos y hoodies', photo: local('busos-hoodies.jpg') },
+  { title: 'Chaquetas', photo: local('chaquetas.jpg') },
+  { title: 'Tenis', photo: local('tenis.jpg') },
+  { title: 'Mujer', photo: local('mujer.jpg') },
+  { title: 'Hombre', photo: local('hombre.jpg') },
 ]
 
 // Prendas de EJEMPLO. Cámbialas por las reales.

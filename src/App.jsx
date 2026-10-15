@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
+import Ticker from './components/Ticker'
 import Categories from './components/categories'
+import Featured from './components/Featured'
+import Statement from './components/Statement'
 import Products from './components/products'
 import ProductDetail from './components/ProductDetail'
 import CartPage from './components/CartPage'
@@ -24,6 +27,8 @@ const readRoute = () => {
 
 const routeKey = (r) =>
   r.page === 'product' ? `p${r.id}` : r.page === 'category' ? `c${r.name}` : r.page === 'cart' ? 'cart' : ''
+
+const marquee = ['Ropa de calidad', 'Tu estilo está a un mensaje', 'Cada prenda es un acierto', 'Envíos a toda Colombia']
 
 export default function App() {
   const [route, setRoute] = useState(readRoute)
@@ -52,6 +57,29 @@ export default function App() {
     if (key) window.scrollTo(0, 0)
   }, [key])
 
+  // Los elementos con clase "reveal" aparecen suavemente al llegar a la pantalla
+  useEffect(() => {
+    const items = document.querySelectorAll('.reveal:not(.is-in)')
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce || !('IntersectionObserver' in window)) {
+      items.forEach((el) => el.classList.add('is-in'))
+      return undefined
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-in')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
+    )
+    items.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [key])
+
   return (
     <>
       <Navbar />
@@ -61,7 +89,10 @@ export default function App() {
       {route.page === 'home' && (
         <main>
           <Hero />
+          <Ticker items={marquee} className="ticker--big" />
           <Categories />
+          <Featured />
+          <Statement />
           <Steps />
           <ShippingPayments />
           <Visit />
