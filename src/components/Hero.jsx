@@ -24,7 +24,7 @@ export default function Hero() {
         <div className="hero__copy">
           <p className="label label--light">Ocaña, N. de S. — Ropa de calidad</p>
           <h1 className="hero__title">
-            <span>Viste a</span>
+            <span>Vistete a</span>
             <span>otro nivel</span>
           </h1>
           <p className="hero__lead">
