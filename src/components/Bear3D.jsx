@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react'
-import { getLogoCutout } from '../cutout'
+import { getStickerCutout } from '../cutout'
 
-const PAD = 44 // margen alrededor del oso para el movimiento y el grosor
+const SOURCE = `${import.meta.env.BASE_URL}oso-elegido.jpg`
+
+const PAD = 70 // margen alrededor del oso para el movimiento y el grosor
 const STRIPS = 40 // franjas horizontales con las que se dobla la cabeza
-const DEPTH = 9 // capas que forman el grosor de la pegatina
-const NECK = 0.5 // altura (0 a 1) donde termina la cabeza y empieza el cuerpo
-const HEAD_X = 44 // cuánto se desplaza la cabeza de lado
-const HEAD_Y = 20 // cuánto se desplaza la cabeza arriba y abajo
+const DEPTH = 18 // capas que forman el grosor de la pegatina
+const NECK = 0.44 // altura (0 a 1) donde termina la cabeza y empieza el cuerpo
+const HEAD_X = 0 // el llavero es rígido: la cabeza no se dobla por dentro
+const HEAD_Y = 0
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
 
@@ -62,8 +64,8 @@ export default function Bear3D() {
       ctx.imageSmoothingQuality = 'high'
 
       // Grosor: capas grises hacia el fondo, más oscuras mientras más lejos
-      const ex = 7 - cur.x * 9
-      const ey = 9 - cur.y * 7
+      const ex = 12 - cur.x * 12
+      const ey = 15 - cur.y * 9
       for (let i = DEPTH; i >= 1; i--) {
         const f = i / DEPTH
         drawWarped(shade, ex * f, ey * f, 0.9 - 0.55 * f)
@@ -120,7 +122,7 @@ export default function Bear3D() {
       visible = entry.isIntersecting
     })
 
-    getLogoCutout()
+    getStickerCutout(SOURCE)
       .then((source) => {
         if (!alive) return
         cut = source
@@ -134,9 +136,7 @@ export default function Bear3D() {
         shade.width = iw
         shade.height = ih
         const sctx = shade.getContext('2d')
-        sctx.drawImage(source, 0, 0)
-        sctx.globalCompositeOperation = 'multiply'
-        sctx.fillStyle = '#9a9a9a'
+        sctx.fillStyle = '#c9c9c9'
         sctx.fillRect(0, 0, iw, ih)
         sctx.globalCompositeOperation = 'destination-in'
         sctx.drawImage(source, 0, 0)

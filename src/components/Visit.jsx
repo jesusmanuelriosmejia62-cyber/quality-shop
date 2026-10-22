@@ -1,4 +1,4 @@
-import { business, visit } from '../data'
+import { business, visit, whatsappLink } from '../data'
 import FloatingLogo from './FloatingLogo'
 
 export default function Visit() {
@@ -18,6 +18,7 @@ export default function Visit() {
             ))}
           </ul>
           <div className="visit__links">
+            <a href={whatsappLink()} className="link-line" target="_blank" rel="noreferrer">WhatsApp</a>
             <a href={business.tiktok} className="link-line" target="_blank" rel="noreferrer">TikTok</a>
             {business.instagram && (
               <a href={business.instagram} className="link-line" target="_blank" rel="noreferrer">Instagram</a>

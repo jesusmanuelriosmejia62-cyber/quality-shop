@@ -1,5 +1,25 @@
+import { useState } from 'react'
 import { shipping, payments } from '../data'
 import FloatingLogo from './FloatingLogo'
+
+// Muestra el logo del método de pago; si el archivo no existe, muestra el nombre
+function PaymentChip({ p }) {
+  const [broken, setBroken] = useState(false)
+  const showLogo = p.logo && !broken
+  return (
+    <li className="pay">
+      {showLogo && (
+        <img
+          className={`pay__logo pay__logo--${p.shape || 'free'}`}
+          src={`${import.meta.env.BASE_URL}${p.logo}`}
+          alt=""
+          onError={() => setBroken(true)}
+        />
+      )}
+      <span>{p.name}</span>
+    </li>
+  )
+}
 
 export default function ShippingPayments() {
   return (
@@ -22,9 +42,9 @@ export default function ShippingPayments() {
             <p className="label">(06) Pagos</p>
             <h2>Paga como prefieras</h2>
             <p className="strong">Métodos de pago disponibles.</p>
-            <ul className="chips">
+            <ul className="pays">
               {payments.map((p) => (
-                <li key={p}>{p}</li>
+                <PaymentChip key={p.name} p={p} />
               ))}
             </ul>
           </div>

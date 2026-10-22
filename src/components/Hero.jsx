@@ -1,8 +1,6 @@
-import { Suspense, lazy, useRef } from 'react'
+import { useRef } from 'react'
 import { whatsappLink } from '../data'
-
-// El oso 3D pesa bastante: se descarga aparte para que el resto de la página cargue rápido
-const BearScene = lazy(() => import('./BearScene'))
+import Bear3D from './Bear3D'
 
 export default function Hero() {
   const ref = useRef(null)
@@ -19,18 +17,18 @@ export default function Hero() {
   return (
     <section id="inicio" className="hero" ref={ref} onMouseMove={handleMove}>
       <span className="hero__spot" aria-hidden="true" />
+      <span className="hero__photo" aria-hidden="true" style={{'--photo':`url(${import.meta.env.BASE_URL}fachada.jpg)`}}/>
       <span className="hero__ghost" aria-hidden="true">Quality</span>
 
       <div className="container hero__grid">
         <div className="hero__copy">
           <p className="label label--light">Ocaña, N. de S. — Ropa de calidad</p>
           <h1 className="hero__title">
-            <span>Tu estilo</span>
-            <span>está a</span>
-            <span className="hero__fade">un mensaje</span>
+            <span>Viste a</span>
+            <span>otro nivel</span>
           </h1>
           <p className="hero__lead">
-            Ropa que no falla, que no pasa de moda. Pintas que funcionan hoy, mañana y siempre.
+            Las marcas que buscas, las prendas que quieres. Todo en Quality Shop.
           </p>
           <div className="hero__actions">
             <a href="#categorias" className="btn btn--light">Ver colección</a>
@@ -39,11 +37,8 @@ export default function Hero() {
             </a>
           </div>
         </div>
-
         <div className="hero__art">
-          <Suspense fallback={<div className="bear-scene" />}>
-            <BearScene />
-          </Suspense>
+          <Bear3D />
         </div>
       </div>
 
