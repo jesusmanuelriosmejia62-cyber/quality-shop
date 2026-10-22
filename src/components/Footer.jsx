@@ -1,7 +1,9 @@
-import { business, categories, logo, whatsappLink } from '../data'
+import { business, logo, whatsappLink } from '../data'
+import { useCatalog } from '../CatalogContext'
 import { categoryLink } from '../utils'
 
 export default function Footer() {
+  const { categories } = useCatalog()
   return (
     <footer className="footer">
       <div className="container">
@@ -34,6 +36,9 @@ export default function Footer() {
               <li><a href="#envios">Envíos y pagos</a></li>
               <li><a href="#visitanos">Visítanos</a></li>
               <li><a href="#/carrito">Carrito</a></li>
+              <li><a href="#/politicas/cambios">Cambios y devoluciones</a></li>
+              <li><a href="#/politicas/privacidad">Privacidad</a></li>
+              <li><a href="#/politicas/terminos">Términos y condiciones</a></li>
             </ul>
           </div>
 

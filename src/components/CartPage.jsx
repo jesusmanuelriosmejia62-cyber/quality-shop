@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { products, payments, whatsappLink } from '../data'
+import { payments, whatsappLink } from '../data'
+import { useCatalog } from '../CatalogContext'
 import { money } from '../utils'
 import { useCart } from '../CartContext'
 
@@ -13,6 +14,7 @@ const EMPTY_FORM = {
   reference: '',
   payment: '',
   notes: '',
+  accept: false,
 }
 
 const validate = (f) => {
@@ -25,6 +27,7 @@ const validate = (f) => {
   if (!f.city.trim()) errors.city = 'Escribe tu ciudad o municipio.'
   if (f.address.trim().length < 5) errors.address = 'Escribe tu dirección completa.'
   if (!f.payment) errors.payment = 'Elige un método de pago.'
+  if (!f.accept) errors.accept = 'Debes aceptar la política de privacidad para continuar.'
   return errors
 }
 
@@ -32,7 +35,7 @@ const buildMessage = (lines, f, total, allPriced) => {
   const items = lines
     .map((l, i) => {
       const price = l.product.price ? ` - ${money.format(l.product.price * l.qty)}` : ' - precio por confirmar'
-      return `${i + 1}. ${l.product.name} | Talla ${l.size} | Cant. ${l.qty}${price}`
+      return `${i + 1}. ${l.product.name} | Talla ${l.size}${l.color ? ` | Color ${l.color}` : ''} | Cant. ${l.qty}${price}`
     })
     .join('\n')
 
@@ -75,6 +78,7 @@ function Field({ id, label, error, optional, children }) {
 
 export default function CartPage() {
   const { items, setQty, remove, clear, maxQty } = useCart()
+  const { products } = useCatalog()
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitted, setSubmitted] = useState(false)
   const [sentUrl, setSentUrl] = useState('')
@@ -135,12 +139,12 @@ export default function CartPage() {
               {lines.map((l) => (
                 <li key={l.key} className="cart-item">
                   <a href={`#/prenda/${l.product.id}`} className="cart-item__img" aria-label={`Ver ${l.product.name}`}>
-                    <img src={l.product.photo} alt="" />
+                    <img src={l.product.photo || undefined} alt="" />
                   </a>
 
                   <div className="cart-item__info">
                     <a href={`#/prenda/${l.product.id}`} className="cart-item__name">{l.product.name}</a>
-                    <p>Talla: <strong>{l.size}</strong></p>
+                    <p>Talla: <strong>{l.size}</strong>{l.color && <> · Color: <strong>{l.color}</strong></>}</p>
                     <p className="cart-item__unit">
                       {l.product.price ? money.format(l.product.price) : 'Precio por confirmar'}
                     </p>
@@ -201,7 +205,7 @@ export default function CartPage() {
                   <select {...bind('payment')}>
                     <option value="">Elige uno</option>
                     {payments.map((p) => (
-                      <option key={p} value={p}>{p}</option>
+                      <option key={p.name} value={p.name}>{p.name}</option>
                     ))}
                   </select>
                 </Field>
@@ -219,6 +223,26 @@ export default function CartPage() {
                   <Field id="f-notes" label="Notas del pedido" optional>
                     <textarea rows="3" maxLength={300} {...bind('notes')} />
                   </Field>
+                </div>
+                <div className="checkout__full">
+                  <div className={`field field--check ${shown('accept') ? 'field--error' : ''}`}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        id="f-accept"
+                        checked={form.accept}
+                        onChange={(e) => setForm({ ...form, accept: e.target.checked })}
+                        aria-invalid={shown('accept') ? 'true' : undefined}
+                      />
+                      <span>
+                        Autorizo el tratamiento de mis datos según la{' '}
+                        <a href="#/politicas/privacidad" target="_blank" rel="noreferrer">política de privacidad</a> y acepto los{' '}
+                        <a href="#/politicas/terminos" target="_blank" rel="noreferrer">términos</a> y la{' '}
+                        <a href="#/politicas/cambios" target="_blank" rel="noreferrer">política de cambios</a>.
+                      </span>
+                    </label>
+                    {shown('accept') && <p className="field__error" role="alert">{shown('accept')}</p>}
+                  </div>
                 </div>
               </div>
             </form>

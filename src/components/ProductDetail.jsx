@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { products, sampleReviews, shipping } from '../data'
+import { shipping } from '../data'
+import { useCatalog } from '../CatalogContext'
 import { money, categoryLink } from '../utils'
 import { useCart } from '../CartContext'
 import { useLogoCutoutUrl } from '../cutout'
-import ProductCard from './ProductCard'
+import ProductRail from './ProductRail'
 import FloatingLogo from './FloatingLogo'
 
 const storageKey = (id) => `qs-reviews-${id}`
@@ -25,13 +26,18 @@ const Stars = ({ value }) => (
 
 export default function ProductDetail({ id }) {
   const { add } = useCart()
+  const { products, loading } = useCatalog()
   const watermark = useLogoCutoutUrl()
   const product = products.find((p) => p.id === id)
   const [size, setSize] = useState('')
+  const [colorName, setColorName] = useState('')
+  const [photoIdx, setPhotoIdx] = useState(0)
   const [showHint, setShowHint] = useState(false)
   const [added, setAdded] = useState(false)
   const [mine, setMine] = useState(() => loadReviews(id))
   const [form, setForm] = useState({ name: '', rating: 5, text: '' })
+
+  if (!product && loading) return <main className="section" aria-busy="true" />
 
   if (!product) {
     return (
@@ -44,14 +50,22 @@ export default function ProductDetail({ id }) {
     )
   }
 
-  const reviews = [...mine, ...sampleReviews]
-  const average = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+  const colors = product.colors ?? []
+  const color = colors.find((c) => c.name === colorName) ?? colors[0]
+  const gallery = color?.photos?.length ? color.photos : product.photos?.length ? product.photos : [color?.photo ?? product.photo]
+  const mainPhoto = gallery[Math.min(photoIdx, gallery.length - 1)] ?? product.photo
+  const soldOut = !!product.soldOut
+  const outOfStock = (s) => product.stock && product.stock[s] <= 0
+
+  const reviews = mine
+  const average = reviews.length ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0
 
   const sameCategory = products.filter((p) => p.id !== product.id && p.cats.some((c) => product.cats.includes(c)))
   const others = products.filter((p) => p.id !== product.id && !sameCategory.includes(p))
-  const related = [...sameCategory, ...others].slice(0, 4)
+  const related = [...sameCategory, ...others].slice(0, 8)
 
   const needSize = () => {
+    if (soldOut) return false
     if (size) return true
     setShowHint(true)
     document.getElementById('sizes')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -60,13 +74,13 @@ export default function ProductDetail({ id }) {
 
   const addToCart = () => {
     if (!needSize()) return
-    add(product.id, size)
+    add(product.id, size, 1, color?.name ?? '')
     setAdded(true)
   }
 
   const buyNow = () => {
     if (!needSize()) return
-    add(product.id, size)
+    add(product.id, size, 1, color?.name ?? '')
     window.location.hash = '/carrito'
   }
 
@@ -106,20 +120,61 @@ export default function ProductDetail({ id }) {
           </nav>
 
           <div className="detail__grid">
-            <div className="detail__img">
-              <img className="photo" src={product.photo} alt={product.name} />
-              {product.tag && <span className="product__tag">{product.tag}</span>}
+            <div className={`detail__gallery ${gallery.length > 1 ? 'detail__gallery--thumbs' : ''}`}>
+              {gallery.length > 1 && (
+                <div className="detail__thumbs" role="list" aria-label="Más fotos de la prenda">
+                  {gallery.map((g, i) => (
+                    <button key={g} type="button" role="listitem" className={i === photoIdx ? 'on' : ''} onClick={() => setPhotoIdx(i)} aria-label={`Foto ${i + 1}`}>
+                      <img src={g} alt="" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="detail__img">
+                <img className="photo" src={mainPhoto || undefined} alt={`${product.name}${color ? ` - ${color.name}` : ''}`} />
+                {soldOut ? <span className="product__tag product__tag--out">Agotado</span> : product.tag && <span className="product__tag">{product.tag}</span>}
+              </div>
             </div>
 
             <div className="detail__info">
               <p className="label">{product.cats.join(' · ')}</p>
               <h1>{product.name}</h1>
-              <div className="detail__rating">
-                <Stars value={Math.round(average)} />
-                <span>{average.toFixed(1)} · {reviews.length} comentarios</span>
-              </div>
-              <p className="detail__price">{product.price ? money.format(product.price) : 'Consultar precio'}</p>
+              {reviews.length > 0 && (
+                <div className="detail__rating">
+                  <Stars value={Math.round(average)} />
+                  <span>{average.toFixed(1)} · {reviews.length} comentarios</span>
+                </div>
+              )}
+              <p className="detail__price">{product.price ? money.format(product.price) : 'Consultar precio'}{soldOut && <span className="detail__out"> · Agotado</span>}</p>
               <p className="detail__desc">{product.desc}</p>
+
+              {colors.length > 0 && (
+                <>
+                  <p className="detail__label">
+                    Color <span className="detail__color-name">{color.name}</span>
+                  </p>
+                  <div className="swatches" role="radiogroup" aria-label="Elige el color">
+                    {colors.map((c) => (
+                      <button
+                        key={c.name}
+                        type="button"
+                        role="radio"
+                        aria-checked={color.name === c.name}
+                        aria-label={c.name}
+                        title={c.name}
+                        className={`swatch ${color.name === c.name ? 'on' : ''}`}
+                        onClick={() => {
+                          setColorName(c.name)
+                          setPhotoIdx(0)
+                          setAdded(false)
+                        }}
+                      >
+                        <span style={{ background: c.hex }} />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <p className="detail__label" id="sizes">Talla</p>
               <div className="sizes" role="radiogroup" aria-label="Elige tu talla">
@@ -129,7 +184,9 @@ export default function ProductDetail({ id }) {
                     type="button"
                     role="radio"
                     aria-checked={size === s}
-                    className={`size ${size === s ? 'on' : ''} ${showHint && !size ? 'size--alert' : ''}`}
+                    disabled={outOfStock(s)}
+                    title={outOfStock(s) ? 'Talla agotada' : undefined}
+                    className={`size ${size === s ? 'on' : ''} ${outOfStock(s) ? 'size--out' : ''} ${showHint && !size ? 'size--alert' : ''}`}
                     onClick={() => {
                       setSize(s)
                       setShowHint(false)
@@ -143,10 +200,10 @@ export default function ProductDetail({ id }) {
               {showHint && <p className="detail__hint" role="alert">Elige una talla para continuar.</p>}
 
               <div className="detail__buy">
-                <button type="button" className="btn btn--buy" onClick={buyNow}>
-                  Comprar ahora
+                <button type="button" className="btn btn--buy" onClick={buyNow} disabled={soldOut}>
+                  {soldOut ? 'Agotado' : 'Comprar ahora'}
                 </button>
-                <button type="button" className="btn btn--outline btn--buy" onClick={addToCart}>
+                <button type="button" className="btn btn--outline btn--buy" onClick={addToCart} disabled={soldOut}>
                   Agregar al carrito
                 </button>
               </div>
@@ -181,12 +238,28 @@ export default function ProductDetail({ id }) {
         </div>
       </section>
 
+      {related.length > 0 && (
+      <section className="section section--soft has-floatlogo">
+        <FloatingLogo className="floatlogo--right" />
+        <div className="container">
+          <div className="section-head">
+            <div>
+              <p className="label">Completa tu pinta</p>
+              <h2>También te puede gustar</h2>
+            </div>
+          </div>
+        </div>
+        <ProductRail products={related} />
+      </section>
+      )}
+
       <section className="section has-floatlogo">
         <FloatingLogo className="floatlogo--left" />
         <div className="container">
           <h2>Comentarios</h2>
           <div className="reviews">
             <div className="reviews__list">
+              {reviews.length === 0 && <p className="empty">Todavía no hay comentarios. ¡Sé el primero!</p>}
               {reviews.map((r, i) => (
                 <article key={`${r.name}-${r.date}-${i}`} className="review">
                   <div className="review__top">
@@ -238,23 +311,6 @@ export default function ProductDetail({ id }) {
               </label>
               <button type="submit" className="btn">Publicar comentario</button>
             </form>
-          </div>
-        </div>
-      </section>
-
-      <section className="section section--soft has-floatlogo">
-        <FloatingLogo className="floatlogo--right" />
-        <div className="container">
-          <div className="section-head">
-            <div>
-              <p className="label">Completa tu pinta</p>
-              <h2>También te puede gustar</h2>
-            </div>
-          </div>
-          <div className="products">
-            {related.map((p) => (
-              <ProductCard key={p.id} p={p} />
-            ))}
           </div>
         </div>
       </section>

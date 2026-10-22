@@ -20,8 +20,8 @@
   --pad: clamp(16px, 4vw, 48px);
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Filtro de las fotos: quítalo (filter: none) cuando tengas fotos reales a color */
-  --photo-filter: grayscale(1) contrast(1.05);
+  /* Filtro de las fotos: none = a color. Para blanco y negro: grayscale(1) contrast(1.05) */
+  --photo-filter: none;
 }
 
 *,
@@ -282,6 +282,22 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
   flex-direction: column;
   justify-content: space-between;
 }
+
+.hero__photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Oscurece la izquierda para que se lea el texto, y deja ver más la foto a la derecha */
+  background:
+  /*ajustar la calidad de la imagen*/
+    linear-gradient(90deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.6) 55%, rgba(0, 0, 0, 0.3) 100%),
+    var(--photo) center / cover no-repeat;
+  /* Difuminado: la foto se funde con el negro hacia abajo y hacia arriba */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 55%, transparent 100%);
+} 
+
 .hero__ghost {
   position: absolute;
   left: 50%;
@@ -307,9 +323,12 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
   gap: 40px;
   padding-block: 56px 40px;
 }
+/*espacio del titulo al borde*/
+.hero__copy{ padding: 24px;}
+
 .hero__title {
   font-size: clamp(3.4rem, 10.5vw, 9.6rem);
-  line-height: 0.86;
+  line-height: 0.96;
   margin: 0 0 28px;
 }
 .hero__title span { display: block; }
@@ -324,7 +343,7 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
 
 .hero__art { position: relative; display: grid; place-items: center; animation: float 9s ease-in-out infinite; }
 /* Oso animado en 3D (Three.js) */
-.bear-scene { position: relative; width: min(560px, 100%); aspect-ratio: 1 / 1.08; cursor: pointer; touch-action: pan-y; }
+.bear-scene { position: relative; width: min(560px, 100%); aspect-ratio: 1 / 1.08; cursor: default; touch-action: pan-y; }
 .bear-scene canvas { display: block; width: 100%; height: 100%; }
 
 /* Foco de luz que sigue al cursor */
@@ -337,7 +356,7 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
   transition: opacity 0.4s;
 }
 
-.bear3d { position: relative; width: min(540px, 100%); perspective: 1100px; }
+.bear3d { position: relative; width: min(540px, 100%); perspective: 1100px; transform: scale(1.18); transform-origin: 50% 55%; }
 .bear3d__tilt { transform-style: preserve-3d; will-change: transform; }
 .bear3d canvas { display: block; width: 100%; height: auto; aspect-ratio: 784 / 778; }
 @keyframes float {
@@ -429,7 +448,8 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
   scrollbar-width: thin;
   scrollbar-color: var(--ink) transparent;
 }
-.rail .product { flex: 0 0 clamp(240px, 24vw, 340px); scroll-snap-align: start; }
+.rail { padding-inline: 62px; scroll-padding-inline: 62px; }
+.rail .product { flex: 0 0 calc((100% - 124px - 16px) / 3); scroll-snap-align: start; }
 
 .products { display: grid; grid-template-columns: repeat(4, 1fr); gap: 36px 8px; }
 .product { display: block; }
@@ -526,11 +546,18 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
 .list li:last-child { border-bottom: 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chips li { border: 1px solid var(--ink); border-radius: 30px; padding: 8px 20px; font-family: var(--font-mono); font-weight: 500; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+/* Métodos de pago: lista hacia abajo, logo pequeño y el nombre al frente */
+.pays { display: flex; flex-direction: column; gap: 14px; }
+.pay { display: flex; align-items: center; gap: 14px; font-size: 16px; font-weight: 500; }
+.pay__logo { height: 34px; width: auto; display: block; flex: none; }
+.pay__logo--circle { border-radius: 50%; }
+.pay__logo--square { border-radius: 9px; }
+.pay__logo--free { border-radius: 4px; }
 
 /* ---------- Visítanos ---------- */
 .visit { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
 .visit__links { display: flex; gap: 24px; margin-top: 24px; }
-.map { width: 100%; height: 440px; border: 0; filter: grayscale(1) contrast(1.1); }
+.map { width: 100%; height: 440px; border: 0; }
 
 /* ---------- Pie de página ---------- */
 .footer { background: var(--black); color: var(--white); padding: 72px 0 24px; overflow: hidden; }
@@ -570,8 +597,8 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
 }
 
 /* ---------- Botón flotante de WhatsApp ---------- */
+.float-social { position: fixed; right: 20px; bottom: 20px; z-index: 100; display: flex; flex-direction: column; gap: 12px; }
 .wa-float {
-  position: fixed; right: 20px; bottom: 20px; z-index: 100;
   width: 56px; height: 56px; border-radius: 50%;
   display: grid; place-items: center;
   background: var(--black); color: var(--white);
@@ -623,7 +650,8 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
 .crumb { display: inline-block; font-family: var(--font-mono); font-weight: 500; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--steel); margin-bottom: 24px; }
 .crumb:hover { color: var(--ink); text-decoration: underline; }
 
-.detail__grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 5vw, 80px); align-items: start; }
+/* Ancho de la foto de la prenda: cambia el 540px para hacerla más grande o más pequeña */
+.detail__grid { display: grid; grid-template-columns: minmax(0, 540px) minmax(0, 1fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
 .detail__img { position: sticky; top: 92px; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); }
 .detail__img img { width: 100%; height: 100%; object-fit: cover; }
 .detail__img:hover img { filter: none; }
@@ -867,3 +895,123 @@ h3 { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-heig
   .js .reveal { opacity: 1; transform: none; transition: none; }
   html { scroll-behavior: auto; }
 }
+
+/* Oso real: fotos del modelo 3D que giran la cabeza hacia el cursor */
+.bear-photos { position: relative; width: min(560px, 100%); aspect-ratio: 640 / 600; cursor: default; touch-action: pan-y; }
+.bear-photos__view { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* Carrusel con flechas a los costados */
+.rail-wrap { position: relative; }
+.rail-arrow {
+  position: absolute;
+  top: 38%;
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+.rail-arrow:hover { background: #111; color: #fff; }
+.rail-arrow--prev { left: 8px; }
+.rail-arrow--next { right: 8px; }
+
+/* Colores de la prenda */
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line, #d6d6d6); padding: 3px; background: transparent; cursor: pointer; }
+.swatch span { display: block; width: 100%; height: 100%; border-radius: 50%; border: 1px solid rgba(0, 0, 0, 0.15); }
+.swatch:hover { border-color: var(--ink); }
+.swatch.on { border: 2px solid var(--ink); }
+.detail__color-name { text-transform: none; letter-spacing: 0; color: #555; font-family: var(--font-body, inherit); }
+
+/* Agotado */
+.product__tag--out { background: #b3261e; color: #fff; }
+.product--out .product__img img { opacity: 0.55; }
+.detail__out { color: #b3261e; font-weight: 600; }
+.size--out { opacity: 0.4; text-decoration: line-through; cursor: not-allowed; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.detail__gallery { position: sticky; top: 92px; }
+.detail__gallery--thumbs { display: grid; grid-template-columns: 78px 1fr; gap: 12px; align-items: start; }
+.detail__gallery .detail__img { position: relative; top: auto; }
+.detail__thumbs { display: flex; flex-direction: column; gap: 10px; }
+.detail__thumbs button { width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 1px solid #cfcfcf; background: #fff; cursor: pointer; opacity: 0.7; }
+.detail__thumbs button:hover { opacity: 1; }
+.detail__thumbs button.on { border: 2px solid var(--ink); opacity: 1; }
+.detail__thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 900px) {
+  .detail__gallery { position: static; }
+  .detail__gallery--thumbs { grid-template-columns: 1fr; }
+  .detail__gallery--thumbs .detail__thumbs { order: 2; flex-direction: row; overflow-x: auto; }
+  .detail__thumbs button { width: 72px; flex: none; }
+}
+.pills--sub { margin-top: -8px; }
+
+/* ---------- Panel de administración ---------- */
+.adm { max-width: 980px; margin: 0 auto; padding: 24px 16px 80px; font-size: 15px; }
+.adm h1 { font-size: 28px; margin: 0; }
+.adm h2 { font-size: 24px; margin: 0 0 16px; }
+.adm h3 { font-size: 15px; margin: 24px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.adm-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #ddd; }
+.adm-link { background: none; border: 0; margin-left: 16px; font: inherit; text-decoration: underline; cursor: pointer; color: inherit; }
+.adm-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.adm-tabs button { padding: 10px 18px; border: 1px solid #111; background: #fff; cursor: pointer; font: inherit; }
+.adm-tabs button.on { background: #111; color: #fff; }
+.adm-ok { background: #e6f4ea; color: #137333; padding: 10px 14px; margin: 0 0 14px; }
+.adm-error { color: #b3261e; margin: 8px 0; }
+.adm-help { color: #666; font-size: 13px; margin: 0 0 10px; }
+.adm-login { max-width: 380px; margin: 80px auto; display: grid; gap: 14px; }
+.adm-form { display: grid; gap: 14px; }
+.adm label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.adm input:not([type="checkbox"]):not([type="color"]), .adm textarea, .adm select { padding: 10px 12px; border: 1px solid #bbb; background: #fff; font: inherit; width: 100%; box-sizing: border-box; }
+.adm-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; align-items: end; }
+.adm-check { display: flex !important; align-items: center; gap: 8px !important; font-weight: 500 !important; }
+.adm-actions { display: flex; gap: 10px; margin-top: 10px; }
+.adm-photos { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.adm-photo { position: relative; width: 110px; height: 138px; border: 1px solid #ccc; background: #f3f3f3; }
+.adm-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.adm-photo__main { position: absolute; top: 4px; left: 4px; background: #111; color: #fff; font-size: 10px; padding: 2px 6px; }
+.adm-photo__bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; background: rgba(0,0,0,0.7); }
+.adm-photo__bar button { flex: 1; padding: 4px 2px; font-size: 11px; color: #fff; background: none; border: 0; cursor: pointer; }
+.adm-photo--add { display: grid; place-items: center; cursor: pointer; border-style: dashed; font-size: 13px; }
+.adm-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.adm-presets button, .adm-small, .adm-size button, .adm-color__top button, .adm-list button { padding: 8px 12px; border: 1px solid #111; background: #fff; cursor: pointer; font: inherit; font-size: 13px; }
+.adm-small { justify-self: start; }
+.adm-size { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 6px; }
+.adm-color { border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; display: grid; gap: 10px; }
+.adm-color__top { display: grid; grid-template-columns: 52px 1fr auto; gap: 8px; align-items: center; }
+.adm-color__top input[type="color"] { width: 52px; height: 42px; padding: 2px; border: 1px solid #bbb; background: #fff; }
+.adm-list { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; }
+.adm-list li { display: grid; grid-template-columns: 56px 1fr auto auto; gap: 12px; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; }
+.adm-list__sub { margin-left: 28px; }
+.adm-list img { width: 56px; height: 70px; object-fit: cover; background: #eee; }
+.adm-list__info { display: grid; gap: 2px; min-width: 0; }
+.adm-list__info small { color: #666; }
+.adm-empty { display: block !important; color: #666; }
+.adm-badge { margin-left: 8px; padding: 1px 8px; font-size: 11px; background: #eee; }
+.adm-badge--out { background: #b3261e; color: #fff; }
+.adm-badge--ok { background: #137333; color: #fff; }
+@media (max-width: 600px) { .adm-list li { grid-template-columns: 56px 1fr; } .adm-list li button { grid-column: 2; } }
+.adm-shell { min-height: 100vh; }
+
+/* ---------- Políticas ---------- */
+.policy__wrap { max-width: 820px; }
+.policy__tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 28px; }
+.policy__tabs a { padding: 8px 16px; border: 1px solid #d9d9d9; border-radius: 999px; font-size: 14px; }
+.policy__tabs a.on { background: #111; color: #fff; border-color: #111; }
+.policy__body h1 { margin-bottom: 4px; }
+.policy__date { color: var(--steel); font-size: 14px; margin-bottom: 24px; }
+.policy__body h2 { font-size: 20px; margin: 28px 0 8px; }
+.policy__body p, .policy__body li { line-height: 1.65; }
+.policy__body p { margin: 0 0 12px; }
+.policy__body ul, .policy__body ol { margin: 0 0 12px; padding-left: 22px; }
+.policy__body a { text-decoration: underline; }
+
+.field--check label { display: flex; gap: 10px; align-items: flex-start; text-transform: none; letter-spacing: 0; font-size: 14px; line-height: 1.5; cursor: pointer; }
+.field--check input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
+.field--check a { text-decoration: underline; }
+.policy__body ul { list-style: disc; }
+.policy__body ol { list-style: decimal; }

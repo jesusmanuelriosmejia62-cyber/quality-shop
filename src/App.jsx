@@ -2,23 +2,29 @@ import { useEffect, useState } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Ticker from './components/Ticker'
-import Categories from './components/categories'
+import Categories from './components/Categories'
 import Featured from './components/Featured'
 import Statement from './components/Statement'
-import Products from './components/products'
+import Products from './components/Products'
 import ProductDetail from './components/ProductDetail'
 import CartPage from './components/CartPage'
+import Policies from './components/Policies'
 import Steps from './components/Steps'
 import ShippingPayments from './components/ShippingPayments'
 import Visit from './components/Visit'
 import Footer from './components/Footer'
 import WhatsAppButton from './components/WhatsAppButton'
+import AdminPage from './admin/AdminPage'
+import { useCatalog } from './CatalogContext'
 
 // Rutas en la URL: #/categoria/Camisetas · #/prenda/4 · #/carrito
 const readRoute = () => {
   const hash = decodeURIComponent(window.location.hash)
   if (hash === '#/carrito') return { page: 'cart' }
-  let match = hash.match(/^#\/prenda\/(\d+)$/)
+  if (hash === '#/admin') return { page: 'admin' }
+  let match = hash.match(/^#\/politicas\/(\w+)$/)
+  if (match) return { page: 'policy', kind: match[1] }
+  match = hash.match(/^#\/prenda\/(\d+)$/)
   if (match) return { page: 'product', id: Number(match[1]) }
   match = hash.match(/^#\/categoria\/(.+)$/)
   if (match) return { page: 'category', name: match[1] }
@@ -26,12 +32,13 @@ const readRoute = () => {
 }
 
 const routeKey = (r) =>
-  r.page === 'product' ? `p${r.id}` : r.page === 'category' ? `c${r.name}` : r.page === 'cart' ? 'cart' : ''
+  r.page === 'product' ? `p${r.id}` : r.page === 'category' ? `c${r.name}` : r.page === 'cart' ? 'cart' : r.page === 'admin' ? 'admin' : r.page === 'policy' ? `pol${r.kind}` : ''
 
-const marquee = ['Ropa de calidad', 'Tu estilo está a un mensaje', 'Cada prenda es un acierto', 'Envíos a toda Colombia']
+const marquee = ['Ropa de calidad', 'Vistete a Otro Nivel', 'Cada prenda es un acierto', 'Envíos a toda Colombia']
 
 export default function App() {
   const [route, setRoute] = useState(readRoute)
+  const { loading, products, categories, looks } = useCatalog()
 
   useEffect(() => {
     const onHashChange = () => {
@@ -78,12 +85,17 @@ export default function App() {
     )
     items.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
-  }, [key])
+    // También se vuelve a correr cuando llegan las prendas y categorías de la base de datos
+  }, [key, loading, products.length, categories.length, looks.length])
+
+  // El panel de administración va aparte: sin menú ni pie de página de la tienda
+  if (route.page === 'admin') return <AdminPage />
 
   return (
     <>
       <Navbar />
       {route.page === 'cart' && <CartPage />}
+      {route.page === 'policy' && <Policies kind={route.kind} />}
       {route.page === 'product' && <ProductDetail key={route.id} id={route.id} />}
       {route.page === 'category' && <Products active={route.name} />}
       {route.page === 'home' && (

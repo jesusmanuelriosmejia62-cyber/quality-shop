@@ -16,7 +16,7 @@ function Placeholder({ className, alt }) {
 export default function Photo({ src, alt = '', className = '' }) {
   const [failed, setFailed] = useState(false)
 
-  if (failed) return <Placeholder className={className} alt={alt} />
+  if (failed || !src) return <Placeholder className={className} alt={alt} />
 
   return (
     <img

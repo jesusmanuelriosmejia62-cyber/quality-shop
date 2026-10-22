@@ -24,14 +24,14 @@ export function CartProvider({ children }) {
     }
   }, [items])
 
-  const add = useCallback((id, size, qty = 1) => {
-    const key = `${id}-${size}`
+  const add = useCallback((id, size, qty = 1, color = '') => {
+    const key = `${id}-${size}-${color}`
     setItems((prev) => {
       const found = prev.find((i) => i.key === key)
       if (found) {
         return prev.map((i) => (i.key === key ? { ...i, qty: Math.min(i.qty + qty, MAX_QTY) } : i))
       }
-      return [...prev, { key, id, size, qty }]
+      return [...prev, { key, id, size, color, qty }]
     })
   }, [])
 

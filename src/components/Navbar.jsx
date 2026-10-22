@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { categories, logo, whatsappLink } from '../data'
+import { logo, whatsappLink } from '../data'
+import { useCatalog } from '../CatalogContext'
 import { categoryLink } from '../utils'
 import { useCart } from '../CartContext'
 import Ticker from './Ticker'
@@ -14,13 +15,14 @@ const links = [
 const announcement = ['Envíos a toda Colombia', 'Ropa de calidad', 'Tu estilo está a un mensaje', 'Pide por WhatsApp']
 
 export default function Navbar() {
+  const { categories } = useCatalog()
   const { count } = useCart()
   const [open, setOpen] = useState(false)
   const [preview, setPreview] = useState(0)
   const [megaClosed, setMegaClosed] = useState(false)
   const close = () => setOpen(false)
 
-  const menuItems = [{ title: 'Todo', photo: categories[0].photo }, ...categories]
+  const menuItems = [{ title: 'Todo', photo: categories[0]?.photo ?? '' }, ...categories]
 
   return (
     <>

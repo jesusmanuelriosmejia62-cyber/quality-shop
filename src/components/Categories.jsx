@@ -1,8 +1,10 @@
-import { categories } from '../data'
+import { useCatalog } from '../CatalogContext'
 import { categoryLink } from '../utils'
 import Photo from './Photo'
 
 export default function Categories() {
+  const { categories } = useCatalog()
+  if (categories.length === 0) return null
   return (
     <section id="categorias" className="section">
       <div className="container">

@@ -1,12 +1,17 @@
-import { categories, products } from '../data'
+import { useCatalog } from '../CatalogContext'
 import { categoryLink } from '../utils'
 import ProductCard from './ProductCard'
 import Photo from './Photo'
 import FloatingLogo from './FloatingLogo'
 
 export default function Products({ active }) {
+  const { categories, products, loading } = useCatalog()
   const isAll = active === 'Todo'
-  const category = categories.find((c) => c.title === active) ?? categories[0]
+  const all = categories.flatMap((c) => [c, ...(c.children ?? [])])
+  const category = all.find((c) => c.title === active) ?? categories[0]
+  // Si estás en una categoría con subtipos (o dentro de uno), se muestran como botones
+  const parent = categories.find((c) => c.title === active || c.children?.some((k) => k.title === active))
+  const subs = parent?.children ?? []
   const list = isAll ? products : products.filter((p) => p.cats.includes(active))
 
   return (
@@ -25,6 +30,7 @@ export default function Products({ active }) {
       <section className="section section--tight has-floatlogo">
         <FloatingLogo className="floatlogo--right floatlogo--low" />
         <div className="container">
+          {!loading && (
           <nav className="pills" aria-label="Cambiar categoría">
             {['Todo', ...categories.map((c) => c.title)].map((title) => (
               <a
@@ -37,6 +43,16 @@ export default function Products({ active }) {
               </a>
             ))}
           </nav>
+          )}
+
+          {subs.length > 0 && (
+            <nav className="pills pills--sub" aria-label="Tipos">
+              <a href={categoryLink(parent.title)} className={`pill ${active === parent.title ? 'on' : ''}`}>Todas</a>
+              {subs.map((k) => (
+                <a key={k.id ?? k.title} href={categoryLink(k.title)} className={`pill ${active === k.title ? 'on' : ''}`}>{k.title}</a>
+              ))}
+            </nav>
+          )}
 
           {list.length === 0 ? (
             <p className="empty">Pronto tendremos prendas en esta categoría. Escríbenos y te contamos qué hay.</p>
