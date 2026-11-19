@@ -6,6 +6,13 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY
 // Si faltan las claves en el archivo .env, la página usa los datos de ejemplo de src/data.js
 export const supabase = url && key ? createClient(url, key) : null
 
+// Las fotos de la tienda pueden salir por un proxy con caché de Cloudflare (workers/img-proxy.js)
+// para no gastar el tráfico de Supabase. Se activa con VITE_IMG_HOST (ej. https://img.qualityshopcol.com);
+// sin esa variable las fotos se piden directo a Supabase, como antes.
+const imgHost = import.meta.env.VITE_IMG_HOST?.replace(/\/$/, '')
+const storagePrefix = url ? `${url}/storage/v1/object/public/` : ''
+export const imgUrl = (u) => (imgHost && storagePrefix && typeof u === 'string' && u.startsWith(storagePrefix) ? `${imgHost}/${u.slice(storagePrefix.length)}` : u)
+
 // Reduce la foto antes de subirla (máximo 1600 px) para que la página cargue rápido
 export async function shrinkImage(file, max = 1600) {
   if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') return file

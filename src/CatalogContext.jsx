@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { supabase } from './supabase'
+import { supabase, imgUrl } from './supabase'
 
 const CatalogContext = createContext(null)
 
@@ -9,7 +9,7 @@ function build(cats, prods) {
   const byId = new Map(cats.map((c) => [c.id, c]))
 
   // Si una categoría no tiene portada, se usa la foto de su primera prenda
-  const firstPhoto = (ids) => prods.find((p) => p.active && ids.includes(p.category_id) && p.photos?.length)?.photos[0] ?? ''
+  const firstPhoto = (ids) => imgUrl(prods.find((p) => p.active && ids.includes(p.category_id) && p.photos?.length)?.photos[0]) ?? ''
 
   const categories = active
     .filter((c) => !c.parent_id)
@@ -18,8 +18,8 @@ function build(cats, prods) {
       return {
         id: c.id,
         title: c.name,
-        photo: c.photo_url || firstPhoto([c.id, ...kids.map((k) => k.id)]),
-        children: kids.map((k) => ({ id: k.id, title: k.name, photo: k.photo_url || firstPhoto([k.id]) || c.photo_url || '' })),
+        photo: imgUrl(c.photo_url) || firstPhoto([c.id, ...kids.map((k) => k.id)]),
+        children: kids.map((k) => ({ id: k.id, title: k.name, photo: imgUrl(k.photo_url) || firstPhoto([k.id]) || imgUrl(c.photo_url) || '' })),
       }
     })
 
@@ -31,8 +31,8 @@ function build(cats, prods) {
       const sizeRows = [...(row.product_sizes ?? [])].sort((a, b) => a.id - b.id)
       const colors = [...(row.product_colors ?? [])]
         .sort((a, b) => a.sort - b.sort || a.id - b.id)
-        .map((c) => ({ name: c.name, hex: c.hex, photo: c.photos?.[0] ?? '', photos: c.photos ?? [] }))
-      const photos = row.photos ?? []
+        .map((c) => ({ name: c.name, hex: c.hex, photo: imgUrl(c.photos?.[0]) ?? '', photos: (c.photos ?? []).map(imgUrl) }))
+      const photos = (row.photos ?? []).map(imgUrl)
       return {
         id: row.id,
         name: row.name,
@@ -68,7 +68,7 @@ export function CatalogProvider({ children }) {
       if (prods.error) throw prods.error
       // Los looks se piden aparte: si todavía no se creó la tabla, la tienda sigue funcionando
       const lk = await supabase.from('looks').select('*').eq('active', true).order('sort').order('id')
-      const looks = (lk.error ? [] : lk.data).map((l) => ({ id: l.id, title: l.title, desc: l.description ?? '', photo: l.photo_url || '', productId: l.product_id }))
+      const looks = (lk.error ? [] : lk.data).map((l) => ({ id: l.id, title: l.title, desc: l.description ?? '', photo: imgUrl(l.photo_url) || '', productId: l.product_id }))
       setState({ ...build(cats.data, prods.data), looks, loading: false })
     } catch {
       setState({ categories: [], products: [], looks: [], loading: false })
