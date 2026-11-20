@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { supabase, uploadImage } from '../supabase'
+import { supabase, uploadImage, imgUrl } from '../supabase'
 import { useCatalog } from '../CatalogContext'
 import FloatingLogo from '../components/FloatingLogo'
 
@@ -48,7 +48,7 @@ function PhotoList({ photos, onChange, showMain = true, addLabel = '+ Foto' }) {
     <div className="adm-photos">
       {photos.map((u, i) => (
         <div key={u} className="adm-photo">
-          <img src={u} alt="" />
+          <img src={imgUrl(u)} alt="" loading="lazy" />
           {showMain && i === 0 && <span className="adm-photo__main">Principal</span>}
           <div className="adm-photo__bar">
             {showMain && i > 0 && (
@@ -529,7 +529,7 @@ function AdminInner() {
                   const out = sizes.length > 0 && sizes.every((s) => s.stock <= 0)
                   return (
                     <li key={p.id}>
-                      <img src={p.photos?.[0] || undefined} alt="" />
+                      <img src={imgUrl(p.photos?.[0]) || undefined} alt="" loading="lazy" />
                       <div className="adm-list__info">
                         <strong>{p.name}</strong>
                         <small>{catName(p.category_id)}{p.price ? ` · $${Number(p.price).toLocaleString('es-CO')}` : ''}</small>
@@ -566,7 +566,7 @@ function AdminInner() {
                   <ul className="adm-list">
                     {looks.map((l) => (
                       <li key={l.id}>
-                        <img src={l.photo_url || undefined} alt="" />
+                        <img src={imgUrl(l.photo_url) || undefined} alt="" loading="lazy" />
                         <div className="adm-list__info">
                           <strong>{l.title}</strong>
                           <small>
@@ -605,7 +605,7 @@ function AdminInner() {
                   .flatMap((c) => [c, ...cats.filter((k) => k.parent_id === c.id)])
                   .map((c) => (
                     <li key={c.id} className={c.parent_id ? 'adm-list__sub' : ''}>
-                      <img src={c.photo_url || undefined} alt="" />
+                      <img src={imgUrl(c.photo_url) || undefined} alt="" loading="lazy" />
                       <div className="adm-list__info">
                         <strong>{c.parent_id ? '↳ ' : ''}{c.name}</strong>
                         <small>{prods.filter((p) => p.category_id === c.id).length} prendas{!c.active ? ' · oculta' : ''}</small>
