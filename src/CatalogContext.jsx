@@ -1,5 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { supabase, imgUrl } from './supabase'
+import { supabase, imgUrl, anonKey } from './supabase'
+
+// Si hay proxy de fotos (VITE_IMG_HOST), el mismo Worker entrega el catálogo con una copia de respaldo
+const proxyHost = import.meta.env.VITE_IMG_HOST?.replace(/\/$/, '')
+const COPIA = 'qs-catalogo-copia'
 
 const CatalogContext = createContext(null)
 
@@ -59,7 +63,9 @@ export function CatalogProvider({ children }) {
 
   const reload = useCallback(async () => {
     if (!supabase) return
-    try {
+
+    // 1) Por el Worker de Cloudflare (con caché y copia de respaldo); si falla, 2) directo a Supabase
+    const desdeSupabase = async () => {
       const [cats, prods] = await Promise.all([
         supabase.from('categories').select('*').order('sort').order('name'),
         supabase.from('products').select('*, product_sizes(*), product_colors(*)').order('created_at', { ascending: false }),
@@ -68,10 +74,40 @@ export function CatalogProvider({ children }) {
       if (prods.error) throw prods.error
       // Los looks se piden aparte: si todavía no se creó la tabla, la tienda sigue funcionando
       const lk = await supabase.from('looks').select('*').eq('active', true).order('sort').order('id')
-      const looks = (lk.error ? [] : lk.data).map((l) => ({ id: l.id, title: l.title, desc: l.description ?? '', photo: imgUrl(l.photo_url) || '', productId: l.product_id }))
-      setState({ ...build(cats.data, prods.data), looks, loading: false })
+      return { categories: cats.data, products: prods.data, looks: lk.error ? [] : lk.data }
+    }
+    const desdeWorker = async () => {
+      const r = await fetch(`${proxyHost}/catalogo?k=${encodeURIComponent(anonKey)}`)
+      if (!r.ok) throw new Error('worker')
+      return r.json()
+    }
+    const mostrar = (raw) => {
+      const looks = (raw.looks ?? []).map((l) => ({ id: l.id, title: l.title, desc: l.description ?? '', photo: imgUrl(l.photo_url) || '', productId: l.product_id }))
+      setState({ ...build(raw.categories, raw.products), looks, loading: false })
+    }
+
+    try {
+      let raw
+      try {
+        raw = proxyHost ? await desdeWorker() : await desdeSupabase()
+      } catch {
+        raw = await desdeSupabase()
+      }
+      mostrar(raw)
+      try {
+        localStorage.setItem(COPIA, JSON.stringify(raw))
+      } catch {
+        /* sin espacio o sin permiso: no pasa nada */
+      }
     } catch {
-      setState({ categories: [], products: [], looks: [], loading: false })
+      // Último recurso: la última copia buena que este navegador alcanzó a guardar
+      try {
+        const copia = JSON.parse(localStorage.getItem(COPIA))
+        if (!copia?.products?.length) throw new Error('sin copia')
+        mostrar(copia)
+      } catch {
+        setState({ categories: [], products: [], looks: [], loading: false })
+      }
     }
   }, [])
 

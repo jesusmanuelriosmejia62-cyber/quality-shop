@@ -5,6 +5,7 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 // Si faltan las claves en el archivo .env, la página usa los datos de ejemplo de src/data.js
 export const supabase = url && key ? createClient(url, key) : null
+export const anonKey = key
 
 // Las fotos de la tienda pueden salir por un proxy con caché de Cloudflare (workers/img-proxy.js)
 // para no gastar el tráfico de Supabase. Se activa con VITE_IMG_HOST (ej. https://img.qualityshopcol.com);
